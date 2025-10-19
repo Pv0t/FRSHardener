@@ -78,7 +78,6 @@ function improve_sshd {
 	read -p "" sshd_public_ip
 	echo "ListenAddress "$sshd_public_ip":"$sshd_port | sudo tee -a /etc/ssh/sshd_config 1>/dev/null
 	echo "#ListenAddress 127.0.0.1:"$sshd_port "#For troubleshooting" | sudo tee -a /etc/ssh/sshd_config 1>/dev/null
-
 	echo "PermitUserEnvironment no" | sudo tee -a /etc/ssh/sshd_config 1>/dev/null
 	echo "#PidFile /var/run/sshd.pid #-> Default" | sudo tee -a /etc/ssh/sshd_config 1>/dev/null
 	echo "PrintLastLog no" | sudo tee -a /etc/ssh/sshd_config 1>/dev/null
@@ -131,6 +130,7 @@ function improve_sshd {
 
 
 
+
 #rsyslog 
 
 #fail2ban
@@ -139,9 +139,9 @@ function improve_sshd {
 
 
 echo -e "Options available:"
-echo -e "\t1) Improve the sshd config + rsync log + fail2ban + SMTP."
-echo -e "\t2) Improve the sshd config + rsync log + fail2ban."
-echo -e "\t3) Improve the sshd config + rsync log."
+echo -e "\t1) Improve the sshd config + rsyslog log + fail2ban + SMTP."
+echo -e "\t2) Improve the sshd config + rsyslog log + fail2ban."
+echo -e "\t3) Improve the sshd config + rsyslog log."
 echo -e "\t4) Improve the sshd config."
 
 read -p "Select your option: " opt
