@@ -1,28 +1,31 @@
 #!/bin/bash
 
-RED='033[0;31m'
+RED='\033[0;31m'
 CYAN='\033[0;36m'
 GREEN='\033[0;32m'
-NO-COLOR='\033[0m'
+NOCOLOR='\033[0m'
 
+echo ""
 echo -e "                 Welcome to FRSHardener Project                                          "
 echo ""
-echo -e "${CYAN}INFO: ${NO-COLOR}All options related to Protocol 1 have been excluded from the sshd configuration file."
+echo -e "${CYAN}INFO: ${NOCOLOR}All options related to Protocol 1 have been excluded from the sshd configuration file."
 echo -e "*========================================================================================================="
 
 if [ "$EUID" != "0" ]
 then
-	echo -e "${RED}WARNING: ${NO-COLOR}You are not running this tool with root privileges."
+	echo -e "${RED}WARNING: ${NOCOLOR}You are not running this tool with root privileges."
 	exit 1
 fi
 
 function improve_sshd {
+	#TO-DO: CHECK IF THE SERVICE SSHD IS INSTALLED AND RUNNING
 	echo "#===General & Authentication===#" > /etc/ssh/sshd_config 
-	read -p "INPUT: Enter the port number you wish to use for the sshd(SSH) service: " sshd_port
-	echo "Port" $sshd_port | sudo tee -a /etc/ssh/sshd_config
-	echo "Protocol 2" | sudo tee -a /etc/ssh/sshd_config
-	echo "AddressFamily inet" | sudo tee -a /etc/ssh/sshd_config
-	echo "DenyUsers root" | sudo tee -a /etc/ssh/sshd_config
+	echo -e "${GREEN}INPUT: ${NOCOLOR}Enter the port number you wish to use for the sshd(SSH) service: " 
+	read -p "" sshd_port
+	echo "Port" $sshd_port | sudo tee -a /etc/ssh/sshd_config 1>/dev/null
+	echo "Protocol 2" | sudo tee -a /etc/ssh/sshd_config 1>/dev/null
+	echo "AddressFamily inet" | sudo tee -a /etc/ssh/sshd_config 1>/dev/null
+	echo "DenyUsers root" | sudo tee -a /etc/ssh/sshd_config 1>/dev/null
 	
 	read -p "Write the username of your user (not root) to put inside the 'AllowUsers' option: " users
 	
