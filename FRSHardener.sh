@@ -1,5 +1,6 @@
 #!/bin/bash
 
+PACKAGE_NAME="openssh-server"
 RED='\033[0;31m'
 CYAN='\033[0;36m'
 GREEN='\033[0;32m'
@@ -18,7 +19,19 @@ then
 fi
 
 function improve_sshd {
-	#TO-DO: CHECK IF THE SERVICE SSHD IS INSTALLED AND RUNNING
+	if dpkg -l | grep -q "$PACKAGE_NAME"
+	then
+		echo -e "${CYAN}[INFO]: ${NOCOLOR} $PACKAGE_NAME is installed."
+	else
+		echo "${RED}WARNING: ${NOCOLOR} $PACKAGE_NAME is not installed."
+		echo -e "${GREEN}INPUT: ${NOCOLOR}Do you wanna install $PACKAGE_NAME? [Y/N]"
+		read -p "" openssh_install
+		case $openssh_install in
+			"Y") sudo apt install $PACKAGE_NAME ;;
+			"N") exit 0 ;;
+			"*") exit 0 ;;
+		esac
+	fi
 	echo "#===General & Authentication===#" > /etc/ssh/sshd_config 
 	echo -e "${GREEN}INPUT: ${NOCOLOR}Enter the port number you wish to use for the sshd(SSH) service: " 
 	read -p "" sshd_port
@@ -29,8 +42,8 @@ function improve_sshd {
 
 	echo -e "${GREEN}INPUT: ${NOCOLOR}Enter the username (excluding 'root') that you want to add to the 'AllowUsers' option: " 
 	read -p "" user
-	
 	echo "AllowUsers" $users | sudo tee -a /etc/ssh/sshd_config 1>/dev/null
+	
 	echo "#DenyGroups" | sudo tee -a /etc/ssh/sshd_config 1>/dev/null
 	echo "#AllowGroups" | sudo tee -a /etc/ssh/sshd_config 1>/dev/null
 	echo "AuthorizedKeysFile .ssh/authorized_keys" | sudo tee -a /etc/ssh/sshd_config 1>/dev/null
@@ -118,11 +131,11 @@ function improve_sshd {
 
 
 
-#rsynclog 
+#rsyslog 
 
 #fail2ban
 
-#smtp warning
+#smtp-alert-configuration
 
 
 echo -e "Options available:"
@@ -134,9 +147,9 @@ echo -e "\t4) Improve the sshd config."
 read -p "Select your option: " opt
 
 case $opt in
-	"1") improve_sshd && rsynclog && fail2ban && smtp ;;
-	"2") improve_sshd && rsynclog && fail2ban ;;
-	"3") improve_sshd && rsynclog ;;
+	"1") improve_sshd && rsyslog && fail2ban && smtp ;;
+	"2") improve_sshd && rsyslog && fail2ban ;;
+	"3") improve_sshd && rsyslog ;;
 	"4") improve_sshd ;;
 	"*") exit 0 ;;
 esac
