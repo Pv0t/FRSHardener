@@ -1,19 +1,24 @@
 #!/bin/bash
 
-#Check if the use are started this tool with root permision.
+RED='033[0;31m'
+CYAN='\033[0;36m'
+GREEN='\033[0;32m'
+NO-COLOR='\033[0m'
 
+echo -e "                 Welcome to FRSHardener Project                                          "
+echo ""
+echo -e "${CYAN}INFO: ${NO-COLOR}All options related to Protocol 1 have been excluded from the sshd configuration file."
+echo -e "*========================================================================================================="
 
-#if [ "$id" != "0" ]
-#then
-#	echo "Your are not running this tool with root permission."
-#	exit 1
-#fi
-
-echo "INFO: All options that involve the Protocol 1, are been excluded from the sshd configuration file."
+if [ "$EUID" != "0" ]
+then
+	echo -e "${RED}WARNING: ${NO-COLOR}You are not running this tool with root privileges."
+	exit 1
+fi
 
 function improve_sshd {
-	echo "#===General & Authentication===#" > /etc/ssh/sshd_config
-	read -p "Write the port you want to expose: " sshd_port
+	echo "#===General & Authentication===#" > /etc/ssh/sshd_config 
+	read -p "INPUT: Enter the port number you wish to use for the sshd(SSH) service: " sshd_port
 	echo "Port" $sshd_port | sudo tee -a /etc/ssh/sshd_config
 	echo "Protocol 2" | sudo tee -a /etc/ssh/sshd_config
 	echo "AddressFamily inet" | sudo tee -a /etc/ssh/sshd_config
