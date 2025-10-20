@@ -1,6 +1,7 @@
 #!/bin/bash
 
-RSYSLOG_PACKAGE='rsyslog'
+FAIL2BAM_PACKAGE="fail2ban"
+RSYSLOG_PACKAGE="rsyslog"
 SSHD_PACKAGE="openssh-server"
 RED='\033[0;31m'
 CYAN='\033[0;36m'
@@ -147,6 +148,43 @@ function rsyslog {
 }
 
 #TO-DO: fail2ban
+function fail2ban_configuration {
+	if dpkg -l | grep -q "$FAIL2BAN_PACKAGE"
+	then
+		echo -e "${CYAN}[INFO]: ${NOCOLOR} $FAIL2BAN_PACKAGE is installed."
+	else
+		echo "${RED}WARNING: ${NOCOLOR} $FAIL2BAN_PACKAGE is not installed."
+		echo -e "${GREEN}INPUT: ${NOCOLOR}Do you wanna install $FAIL2BAN_PACKAGE? [Y/N]"
+		read -p "" fail2ban_install
+		case $fail2ban_install in
+			"Y") sudo apt install $FAIL2BAN_PACKAGE ;;
+			"N") exit 0 ;;
+			"*") exit 0 ;;
+		esac
+	fi
+	echo -e "[DEFAULT]" > /etc/fail2ban/jail.local
+	#INSERT YOUR IGNORE-IP
+	echo "ignoreip = 127.0.0.1/8"
+	echo "bantime = -1"
+	echo "findtime = 86400"
+	echo "maxretry = 3"
+	#INSERT A CASE IF THE USER WANNA INSTALL AN FAIL2BAN ALERT VIA E-MAIL
+	echo "destemail = DESTINATION E-MAIL"
+	echo "sender = SENDER E-MAIL"
+	echo "action = %(action_mwl)s"
+	echo "banaction = iptable-multiport"
+	echo ""
+	echo ""
+	echo "[sshd]"
+	echo "enabled = true"
+	echo "port = SSHD_PORT"
+	echo "logpath = /var/log/auth.log"
+	echo "maxretry = 2"
+	echo "finetime = 300"
+	echo "bantime = -1"
+	
+	
+}
 
 #smtp-alert-configuration
 
