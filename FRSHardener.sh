@@ -21,6 +21,9 @@ then
 fi
 
 function improve_sshd {
+	echo ""
+	echo ""
+	echo "[*] Starting the installation and configuration of the service sshd..."
 	if dpkg -l | grep -q "$SSHD_PACKAGE"
 	then
 		echo -e "${CYAN}[INFO]: ${NOCOLOR} $PACKAGE_NAME is installed."
@@ -128,10 +131,14 @@ function improve_sshd {
 	echo "X11UseLocalhost no" | sudo tee -a /etc/ssh/sshd_config 1>/dev/null
 	echo "XAuthLocation none" | sudo tee -a /etc/ssh/sshd_config 1>/dev/null
 	echo "#============================" | sudo tee -a /etc/ssh/sshd_config 1>/dev/null
+	sudo systemctl restart sshd
 }
 
 
 function rsyslog {
+	echo ""
+	echo ""
+	echo "[*] Starting the installation and configuration of the rsyslog..."
 	if dpkg -l | grep -q "$RSYSLOG_PACKAGE"
 	then
 		echo -e "${CYAN}[INFO]: ${NOCOLOR} $RSYSLOG_PACKAGE is installed."
@@ -149,6 +156,9 @@ function rsyslog {
 
 #TO-DO: fail2ban
 function fail2ban_configuration {
+	echo ""
+	echo ""
+	echo "[*] Starting the installation and configuration of the fail2ban service..."
 	if dpkg -l | grep -q "$FAIL2BAN_PACKAGE"
 	then
 		echo -e "${CYAN}[INFO]: ${NOCOLOR} $FAIL2BAN_PACKAGE is installed."
