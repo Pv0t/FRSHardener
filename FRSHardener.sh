@@ -1,6 +1,7 @@
 #!/bin/bash
 
-PACKAGE_NAME="openssh-server"
+RSYSLOG_PACKAGE='rsyslog'
+SSHD_PACKAGE="openssh-server"
 RED='\033[0;31m'
 CYAN='\033[0;36m'
 GREEN='\033[0;32m'
@@ -19,15 +20,15 @@ then
 fi
 
 function improve_sshd {
-	if dpkg -l | grep -q "$PACKAGE_NAME"
+	if dpkg -l | grep -q "$SSHD_PACKAGE"
 	then
 		echo -e "${CYAN}[INFO]: ${NOCOLOR} $PACKAGE_NAME is installed."
 	else
-		echo "${RED}WARNING: ${NOCOLOR} $PACKAGE_NAME is not installed."
-		echo -e "${GREEN}INPUT: ${NOCOLOR}Do you wanna install $PACKAGE_NAME? [Y/N]"
+		echo "${RED}WARNING: ${NOCOLOR} $SSHD_PACKAGE is not installed."
+		echo -e "${GREEN}INPUT: ${NOCOLOR}Do you wanna install $SSHD_PACKAGE? [Y/N]"
 		read -p "" openssh_install
 		case $openssh_install in
-			"Y") sudo apt install $PACKAGE_NAME ;;
+			"Y") sudo apt install $SSHD_PACKAGE ;;
 			"N") exit 0 ;;
 			"*") exit 0 ;;
 		esac
@@ -42,7 +43,7 @@ function improve_sshd {
 
 	echo -e "${GREEN}INPUT: ${NOCOLOR}Enter the username (excluding 'root') that you want to add to the 'AllowUsers' option: " 
 	read -p "" user
-	echo "AllowUsers" $users | sudo tee -a /etc/ssh/sshd_config 1>/dev/null
+	echo "AllowUsers" $user | sudo tee -a /etc/ssh/sshd_config 1>/dev/null
 	
 	echo "#DenyGroups" | sudo tee -a /etc/ssh/sshd_config 1>/dev/null
 	echo "#AllowGroups" | sudo tee -a /etc/ssh/sshd_config 1>/dev/null
@@ -63,7 +64,7 @@ function improve_sshd {
 	echo "LoginGraceTime 30" | sudo tee -a /etc/ssh/sshd_config 1>/dev/null
 	echo "LogLevel VERBOSE" | sudo tee -a /etc/ssh/sshd_config 1>/dev/null
 	echo "HostbasedAuthentication no" | sudo tee -a /etc/ssh/sshd_config 1>/dev/null
-	echo "HostbasedUsesNameFromPacketOnly" | sudo tee -a /etc/ssh/sshd_config 1>/dev/null
+	echo "HostbasedUsesNameFromPacketOnly no" | sudo tee -a /etc/ssh/sshd_config 1>/dev/null
 	echo "IgnoreRhosts yes" | sudo tee -a /etc/ssh/sshd_config 1>/dev/null
 	echo "IgnoreUserKnownHosts yes" | sudo tee -a /etc/ssh/sshd_config 1>/dev/null
 	echo "MaxAuthTries 3" | sudo tee -a /etc/ssh/sshd_config 1>/dev/null
@@ -107,18 +108,18 @@ function improve_sshd {
 	echo "AllowTcpForwarding no" | sudo tee -a /etc/ssh/sshd_config 1>/dev/null
 	echo "" | sudo tee -a /etc/ssh/sshd_config 1>/dev/null
 	echo "#===GSSAPI===#" | sudo tee -a /etc/ssh/sshd_config 1>/dev/null
-	echo "GSSAPIAuthentication no" | sudo tee -a /etc/ssh/sshd_config 1>/dev/null
-	echo "GSSAPIKeyExchange no" | sudo tee -a /etc/ssh/sshd_config 1>/dev/null
-	echo "GSSAPICleanupCredentials yes" | sudo tee -a /etc/ssh/sshd_config 1>/dev/null
-	echo "GSSAPIStrictAcceptorCheck yes" | sudo tee -a /etc/ssh/sshd_config 1>/dev/null
-	echo "GSSAPIStoreCredentialsOnRekey no" | sudo tee -a /etc/ssh/sshd_config 1>/dev/null
+	echo "#GSSAPIAuthentication no" | sudo tee -a /etc/ssh/sshd_config 1>/dev/null
+	echo "#GSSAPIKeyExchange no" | sudo tee -a /etc/ssh/sshd_config 1>/dev/null
+	echo "#GSSAPICleanupCredentials yes" | sudo tee -a /etc/ssh/sshd_config 1>/dev/null
+	echo "#GSSAPIStrictAcceptorCheck yes" | sudo tee -a /etc/ssh/sshd_config 1>/dev/null
+	echo "#GSSAPIStoreCredentialsOnRekey no" | sudo tee -a /etc/ssh/sshd_config 1>/dev/null
 	echo "" | sudo tee -a /etc/ssh/sshd_config 1>/dev/null
 	echo "#===Kerberos===#" | sudo tee -a /etc/ssh/sshd_config 1>/dev/null
-	echo "KerberosAuthentication no" | sudo tee -a /etc/ssh/sshd_config 1>/dev/null
-	echo "KerberosGetAFSToken no" | sudo tee -a /etc/ssh/sshd_config 1>/dev/null
-	echo "KerberosOrLocalPasswd yes" | sudo tee -a /etc/ssh/sshd_config 1>/dev/null
-	echo "KerberosTicketCleanup yes" | sudo tee -a /etc/ssh/sshd_config 1>/dev/null
-	echo "KerberosUseKuserok yes" | sudo tee -a /etc/ssh/sshd_config 1>/dev/null
+	echo "#KerberosAuthentication no" | sudo tee -a /etc/ssh/sshd_config 1>/dev/null
+	echo "#KerberosGetAFSToken no" | sudo tee -a /etc/ssh/sshd_config 1>/dev/null
+	echo "#KerberosOrLocalPasswd yes" | sudo tee -a /etc/ssh/sshd_config 1>/dev/null
+	echo "#KerberosTicketCleanup yes" | sudo tee -a /etc/ssh/sshd_config 1>/dev/null
+	echo "#KerberosUseKuserok yes" | sudo tee -a /etc/ssh/sshd_config 1>/dev/null
 	echo "" | sudo tee -a /etc/ssh/sshd_config 1>/dev/null
 	echo "#===X11-Settings===#" | sudo tee -a /etc/ssh/sshd_config 1>/dev/null
 	echo "X11DisplayOffset 10" | sudo tee -a /etc/ssh/sshd_config 1>/dev/null
@@ -129,11 +130,23 @@ function improve_sshd {
 }
 
 
+function rsyslog {
+	if dpkg -l | grep -q "$RSYSLOG_PACKAGE"
+	then
+		echo -e "${CYAN}[INFO]: ${NOCOLOR} $RSYSLOG_PACKAGE is installed."
+	else
+		echo "${RED}WARNING: ${NOCOLOR} $RSYSLOG_PACKAGE is not installed."
+		echo -e "${GREEN}INPUT: ${NOCOLOR}Do you wanna install $RSYSLOG_PACKAGE? [Y/N]"
+		read -p "" rsyslog_install
+		case $rsyslog_install in
+			"Y") sudo apt install $RSYSLOG_PACKAGE ;;
+			"N") exit 0 ;;
+			"*") exit 0 ;;
+		esac
+	fi
+}
 
-
-#rsyslog 
-
-#fail2ban
+#TO-DO: fail2ban
 
 #smtp-alert-configuration
 
