@@ -1,6 +1,6 @@
 #!/bin/bash
 
-FAIL2BAM_PACKAGE="fail2ban"
+FAIL2BAN_PACKAGE="fail2ban"
 RSYSLOG_PACKAGE="rsyslog"
 SSHD_PACKAGE="openssh-server"
 RED='\033[0;31m'
@@ -25,11 +25,11 @@ function improve_sshd {
 	then
 		echo -e "${CYAN}[INFO]: ${NOCOLOR} $PACKAGE_NAME is installed."
 	else
-		echo "${RED}WARNING: ${NOCOLOR} $SSHD_PACKAGE is not installed."
+		echo -e "${RED}WARNING: ${NOCOLOR} $SSHD_PACKAGE is not installed."
 		echo -e "${GREEN}INPUT: ${NOCOLOR}Do you wanna install $SSHD_PACKAGE? [Y/N]"
 		read -p "" openssh_install
 		case $openssh_install in
-			"Y") sudo apt install $SSHD_PACKAGE ;;
+			"Y") sudo apt install -y $SSHD_PACKAGE 1>/dev/null ;;
 			"N") exit 0 ;;
 			"*") exit 0 ;;
 		esac
@@ -136,11 +136,11 @@ function rsyslog {
 	then
 		echo -e "${CYAN}[INFO]: ${NOCOLOR} $RSYSLOG_PACKAGE is installed."
 	else
-		echo "${RED}WARNING: ${NOCOLOR} $RSYSLOG_PACKAGE is not installed."
+		echo -e "${RED}WARNING: ${NOCOLOR} $RSYSLOG_PACKAGE is not installed."
 		echo -e "${GREEN}INPUT: ${NOCOLOR}Do you wanna install $RSYSLOG_PACKAGE? [Y/N]"
 		read -p "" rsyslog_install
 		case $rsyslog_install in
-			"Y") sudo apt install $RSYSLOG_PACKAGE ;;
+			"Y") sudo apt install -y $RSYSLOG_PACKAGE 1>/dev/null ;;
 			"N") exit 0 ;;
 			"*") exit 0 ;;
 		esac
@@ -153,42 +153,43 @@ function fail2ban_configuration {
 	then
 		echo -e "${CYAN}[INFO]: ${NOCOLOR} $FAIL2BAN_PACKAGE is installed."
 	else
-		echo "${RED}WARNING: ${NOCOLOR} $FAIL2BAN_PACKAGE is not installed."
+		echo -e "${RED}WARNING: ${NOCOLOR} $FAIL2BAN_PACKAGE is not installed."
 		echo -e "${GREEN}INPUT: ${NOCOLOR}Do you wanna install $FAIL2BAN_PACKAGE? [Y/N]"
 		read -p "" fail2ban_install
 		case $fail2ban_install in
-			"Y") sudo apt install $FAIL2BAN_PACKAGE ;;
+			"Y") sudo apt install -y $FAIL2BAN_PACKAGE 1>/dev/null ;;
 			"N") exit 0 ;;
 			"*") exit 0 ;;
 		esac
 	fi
 	echo -e "[DEFAULT]" > /etc/fail2ban/jail.local
 	#INSERT YOUR IGNORE-IP
-	echo "ignoreip = 127.0.0.1/8"
-	echo "bantime = -1"
-	echo "findtime = 86400"
-	echo "maxretry = 3"
+	echo "#ignoreip = 127.0.0.1/8 -> Troubleshooting" | sudo tee -a /etc/fail2ban/jail.local 1>/dev/null
+	echo "bantime = -1" | sudo tee -a /etc/fail2ban/jail.local 1>/dev/null
+	echo "findtime = 86400" | sudo tee -a /etc/fail2ban/jail.local 1>/dev/null
+	echo "maxretry = 3" | sudo tee -a /etc/fail2ban/jail.local 1>/dev/null
 	#INSERT A CASE IF THE USER WANNA INSTALL AN FAIL2BAN ALERT VIA E-MAIL
-	echo "destemail = DESTINATION E-MAIL"
-	echo "sender = SENDER E-MAIL"
-	echo "action = %(action_mwl)s"
-	echo "banaction = iptable-multiport"
-	echo ""
-	echo ""
-	echo "[sshd]"
-	echo "enabled = true"
-	echo "port = SSHD_PORT"
-	echo "logpath = /var/log/auth.log"
-	echo "maxretry = 2"
-	echo "finetime = 300"
-	echo "bantime = -1"
+	echo "destemail = DESTINATION E-MAIL" | sudo tee -a /etc/fail2ban/jail.local 1>/dev/null
+	echo "sender = SENDER E-MAIL" | sudo tee -a /etc/fail2ban/jail.local 1>/dev/null
+	
+	echo "action = %(action_mwl)s" | sudo tee -a /etc/fail2ban/jail.local 1>/dev/null
+	echo "banaction = iptable-multiport" | sudo tee -a /etc/fail2ban/jail.local 1>/dev/null
+	echo "" | sudo tee -a /etc/fail2ban/jail.local 1>/dev/null
+	echo "" | sudo tee -a /etc/fail2ban/jail.local 1>/dev/null
+	echo "[sshd]" | sudo tee -a /etc/fail2ban/jail.local 1>/dev/null
+	echo "enabled = true" | sudo tee -a /etc/fail2ban/jail.local 1>/dev/null
+	echo "port = SSHD_PORT" | sudo tee -a /etc/fail2ban/jail.local 1>/dev/null
+	echo "logpath = /var/log/auth.log" | sudo tee -a /etc/fail2ban/jail.local 1>/dev/null
+	echo "maxretry = 2" | sudo tee -a /etc/fail2ban/jail.local 1>/dev/null
+	echo "finetime = 300" | sudo tee -a /etc/fail2ban/jail.local 1>/dev/null
+	echo "bantime = -1" | sudo tee -a /etc/fail2ban/jail.local 1>/dev/null
 	
 	
 }
 
 #smtp-alert-configuration
 
-
+#IMPROVE THE OPTIONS
 echo -e "Options available:"
 echo -e "\t1) Improve the sshd config + rsyslog log + fail2ban + SMTP."
 echo -e "\t2) Improve the sshd config + rsyslog log + fail2ban."
@@ -198,9 +199,9 @@ echo -e "\t4) Improve the sshd config."
 read -p "Select your option: " opt
 
 case $opt in
-	"1") improve_sshd && rsyslog && fail2ban && smtp ;;
-	"2") improve_sshd && rsyslog && fail2ban ;;
-	"3") improve_sshd && rsyslog ;;
-	"4") improve_sshd ;;
+	"1") improve_sshd && rsyslog && fail2ban_configuration && smtp ;;
+	#"2") improve_sshd && rsyslog && fail2ban ;;
+	#"3") improve_sshd && rsyslog ;;
+	#"4") improve_sshd ;;
 	"*") exit 0 ;;
 esac
