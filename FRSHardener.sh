@@ -1,5 +1,7 @@
 #!/bin/bash
 
+POSTFIX_PACKAGE="postfix"
+MAILUTILS_PACKAGE="mailutils"
 FAIL2BAN_PACKAGE="fail2ban"
 RSYSLOG_PACKAGE="rsyslog"
 SSHD_PACKAGE="openssh-server"
@@ -154,7 +156,7 @@ function rsyslog {
 	fi
 }
 
-#TO-DO: fail2ban
+#NEED TO HARDEN THE CONFIGURATION
 function fail2ban_configuration {
 	echo ""
 	echo ""
@@ -197,7 +199,68 @@ function fail2ban_configuration {
 	
 }
 
-#smtp-alert-configuration
+#NEED TO BE TESTED and HARDEN THE CONFIGURATION
+func smtp_mail_alert {
+	echo ""
+	echo ""
+	echo "[*] Starting the installation and configuration of e-mail alert..."
+	if dpkg -l | grep -q "$POSTFIX_PACKAGE"
+	then
+		echo -e "${CYAN}[INFO]: ${NOCOLOR} $POSTFIX_PACKAGE is installed."
+	else
+		echo -e "${RED}WARNING: ${NOCOLOR} $POSTFIX_PACKAGE is not installed."
+		echo -e "${GREEN}INPUT: ${NOCOLOR}Do you wanna install $POSTFIX_PACKAGE? [Y/N]"
+		read -p "" postfix_install
+		case $postfix_install in
+			"Y") sudo apt install -y $POSTFIX_PACKAGE 1>/dev/null ;;
+			"N") exit 0 ;;
+			"*") exit 0 ;;
+		esac
+	 if dpkg -l | grep -q "$MAILUTILS_PACKAGE"
+	 then
+		 echo -e "${CYAN}[INFO]: ${NOCOLOR} $MAILUTILS_PACKAGE is installed."
+	 else
+		 echo -e "${RED}WARNING: ${NOCOLOR} $MAILUTILS_PACKAGE is not installed."
+		 echo -e "${GREEN}INPUT: ${NOCOLOR}Do you wanna install $MAILUTILS_PACKAGE? [Y/N]"
+		 read -p "" mailutils_install
+		 case $mailutils_install in
+			 "Y") sudo apt install -y $MAILUTILS_PACKAGE 1>/dev/null ;;
+			 "N") exit 0 ;;
+			 "*") exit 0 ;;
+		 esac
+	  fi
+	  #NEED TO HARDEN THE CONFIGURATION OF MAIN.CF
+	  sudo rm /etc/postfix/main.cf
+	  echo "smtpd_banner = $myhostname ESMTP $mail_name (Debian/GNU)" > /etc/postfix/main.cf #POSSIBLE INFORMATION LEAKGE? NEED TO BE INVESTIGATE
+	  echo "biff = no" | sudo tee -a /etc/postfix/main.cf
+	  echo "append_dot_mydomain = no" | sudo tee -a /etc/postfix/main.cf
+	  echo "readme_directory = no" | sudo tee -a /etc/postfix/main.cf
+	  echo "smtpd_tls_cert_file=/etc/ssl/certs/ssl-cert-snakeoil.pem"
+	  echo "smtpd_tls_key_file=/etc/ssl/private/ssl-cert-snakeoil.key"
+	  echo "smtpd_tls_security_level=may"
+	  echo "smtp_tls_CApath=/etc/ssl/certs"
+	  echo "smtp_tls_session_cache_database = btree:${data_directory}/smtp_scache"
+	  echo "smtpd_relay_restrictions = permit_mynetworks permit_sasl_authenticated defer_unauth_destination"
+	  echo "alias_maps = hash:/etc/aliases"
+	  echo "alias_database = hash:/etc/aliases"
+	  echo "relayhost = [mail.gmail.com]:465"
+	  echo "smtp_sasl_auth_enable = yes"
+	  echo "smtp_sasl_password_maps = hash:/etc/postfix_sasl_passwd"
+	  echo "smtp_sasl_security_options = noanonymous"
+	  echo "smtp_tls_security_level = encrypt"
+	  echo "smtp_sasl_mechanism_filter = plain"
+	  echo "smtp_tls_wrappermode = yes"
+	  echo "sender_canonical_maps = hash:/etc/postfix/sender_canonical"
+	  echo "mynetworks = 127.0.0.0/8"
+	  echo "mailbox_size_limit = 0"
+	  echo "recipient_delimiter = +"
+	  echo "inet_interfaces = all"
+	  echo "inet_protocols = ipv4"
+	  #ALL THE CONFIGURATION NEED TO BE TESTED AND IMPROVED.
+	  cat /etc/postfix/main.cf
+	
+	
+}
 
 #IMPROVE THE OPTIONS
 echo -e "Options available:"
